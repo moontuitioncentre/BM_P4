@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>听写练习（Bahasa Melayu）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: "Noto Sans SC", sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; background-color: #f0f0f0;
+    }
+    .container {
+      text-align: center; padding: 20px; background: #fff; border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,.1); max-width: 720px; width: 92%;
+    }
+    .question { font-size: 28px; margin-bottom: 10px; }
+    .word { font-size: 34px; margin-bottom: 16px; }
+    .btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 15px;
+  margin-bottom: 14px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.search-box input {
+  font-size: 18px;
+  padding: 8px 12px;
+  width: 180px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.btn.search-btn {
+  background-color: #008cff;
+}
+
+    .btn {
+      font-size: 18px; padding: 10px 20px; border: none; border-radius: 8px;
+      background-color: #dc3545; color: #fff; cursor: pointer;
+    }
+    .btn.secondary { background-color: #6c757d; }
+    .btn.info { background-color: #dc3545; }
+    .btn.success { background-color: #dc3545; }
+    .btn.warning { background-color: #ffc107; color: #000; }
+    .meaning {
+      margin-top: 10px; font-size: 20px; background: #f8f9fa; border-radius: 8px;
+      padding: 12px; min-height: 60px; line-height: 1.6; white-space: pre-wrap;
+    }
+
+.test-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.test-btn {
+  font-size: 18px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}
+
+.reading-btn {
+  background-color: #007bff;
+}
+
+.meaning-btn {
+  background-color: #28a745;
+}
+
+.test-btn:hover {
+  opacity: 0.85;
+}
+
+.set-selector {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.set-selector select {
+  font-size: 18px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: white;
+}
+
+/* 真正含义按钮 - 紫色 */
+.btn.purple {
+  background-color: #8e44ad;
+  color: white;
+}
+
+.btn.purple:hover {
+  background-color: #732d91;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <div class="set-selector">
+  <label for="setSelect">选择词汇 Set：</label>
+  <select id="setSelect" onchange="changeSet()">
+  <option value="Set 1">Set 1</option>
+  <option value="Set 2">Set 2</option>
+  <option value="Set 3">Set 3</option>
+</select>
+</div>
+
+    <div class="search-box">
+  <input 
+  type="text" 
+  id="searchInput" 
+  placeholder=""
+  onkeydown="if(event.key === 'Enter') searchWord();"
+>
+
+  <button 
+    class="btn search-btn" 
+    onclick="searchWord()">
+    Search
+  </button>
+</div>
+    <div class="question" id="question">题目 1</div>
+    <div class="word" id="word">—</div>
+    
+    <div class="btns">
+      <!-- 华文优先 -->
+       <div class="btn-row">
+      <button class="btn" onclick="playMalayWord()">🔊</button>
+      <button class="btn success" onclick="showEnglish()">English</button>
+      <button class="btn info" onclick="showChinese()">华文</button>
+      </div>
+
+      <div class="btn-row">
+  <button class="btn purple" onclick="showTrueMalay()">Makna</button>
+  <button class="btn purple" onclick="showTrueEnglish()">Meaning</button>
+  <button class="btn purple" onclick="showTrueChinese()">含义</button>
+</div>
+
+      <div class="btn-row">
+      <button class="btn warning" onclick="showMalaySentence()">Bina Ayat</button>
+      <button class="btn warning" onclick="showEnglishSentence()">Sentence</button>
+      <button class="btn warning" onclick="showChineseSentence()">造句</button>
+      
+      </div>
+
+      <div class="btn-row">
+      <button class="btn secondary" onclick="prevWord()">上一题</button>
+      <button class="btn secondary" onclick="nextWord()">下一题</button>
+      </div>
+
+    <div class="meaning" id="meaning"></div>
+
+    <div class="test-buttons">
+  <button class="test-btn reading-btn" onclick="goToReadingTest()">
+    测试阅读
+  </button>
+
+  <button class="test-btn meaning-btn" onclick="goToMeaningTest()">
+    测试意思
+  </button>
+</div>
+
+  </div>
+
+  <script>
+    // ====== 词库 ======
+    const zh = [
+      "马来文",
+  "环境",
+  "动词",
+  "环保",
+  "马路",
+  "名词",
+  "量词",
+  "格式作文",
+  "课本",
+  "手工艺品",
+  "再循环",
+  "形容词",
+  "画线的词语",
+  "水果",
+  "数词",
+  "辉煌条纹",
+  "互助合作",
+  "谢谢",
+  "孤儿",
+  "学校范围",
+  "派生词",
+  "叠词",
+  "期末考",
+  "零用钱",
+  "模拟试卷",
+  "自我练习",
+  "主动句",
+  "马来传统女装",
+  "页数",
+  "太阳能板",
+  "客厅",
+  "蔬菜",
+  "疑问句",
+  "塑料瓶",
+  "校长",
+  "连词",
+  "空闲时间",
+  "超市",
+  "报纸",
+  "主动语态",
+  "中午",
+  "乐器",
+  "单句",
+  "助词",
+  "词根",
+  "复合词",
+  "沙容陶罐",
+  "叔叔",
+  "的",
+  "和",
+  "在",
+  "那个",
+  "和/与",
+  "里面",
+  "问题",
+  "不",
+  "为了",
+  "你",
+  "词",
+  "句子",
+  "材料",
+  "在",
+  "到",
+  "我们",
+  "学生",
+  "这个",
+  "下面",
+  "将会",
+  "从",
+  "词语",
+  "由",
+  "学校",
+  "然后",
+  "他们",
+  "关于",
+  "因为",
+  "答案",
+  "可以",
+  "家",
+  "选择",
+  "是",
+  "根据",
+  "给",
+  "可以/得到",
+  "他",
+  "或者",
+  "天/日",
+  "必须",
+  "读",
+  "语言",
+  "已经",
+  "部分",
+  "大自然",
+  "作文",
+  "分数",
+  "短文",
+  "需要",
+  "我",
+  "单元",
+  "更加/更多"
+    ];
+
+    const py = [
+  "mǎ lái wén",
+  "huán jìng",
+  "dòng cí",
+  "huán bǎo",
+  "mǎ lù",
+  "míng cí",
+  "liàng cí",
+  "gé shì zuò wén",
+  "kè běn",
+  "shǒu gōng yì pǐn",
+  "zài xún huán",
+  "xíng róng cí",
+  "huà xiàn de cí yǔ",
+  "shuǐ guǒ",
+  "shù cí",
+  "huī huáng tiáo wén",
+  "hù zhù hé zuò",
+  "xiè xie",
+  "gū ér",
+  "xué xiào fàn wéi",
+  "pài shēng cí",
+  "dié cí",
+  "qī mò kǎo",
+  "líng yòng qián",
+  "mó nǐ shì juàn",
+  "zì wǒ liàn xí",
+  "zhǔ dòng jù",
+  "mǎ lái chuán tǒng nǚ zhuāng",
+  "yè shù",
+  "tài yáng néng bǎn",
+  "kè tīng",
+  "shū cài",
+  "yí wèn jù",
+  "sù liào píng",
+  "xiào zhǎng",
+  "lián cí",
+  "kòng xián shí jiān",
+  "chāo shì",
+  "bào zhǐ",
+  "zhǔ dòng yǔ tài",
+  "zhōng wǔ",
+  "yuè qì",
+  "dān jù",
+  "zhù cí",
+  "cí gēn",
+  "fù hé cí",
+  "shā róng táo guàn",
+  "shū shu",
+  "de",
+  "hé",
+  "zài",
+  "nà gè",
+  "hé/yǔ",
+  "lǐ miàn",
+  "wèn tí",
+  "bù",
+  "wèi le",
+  "nǐ",
+  "cí",
+  "jù zi",
+  "cái liào",
+  "zài",
+  "dào",
+  "wǒ men",
+  "xué shēng",
+  "zhè gè",
+  "xià miàn",
+  "jiāng huì",
+  "cóng",
+  "cí yǔ",
+  "yóu",
+  "xué xiào",
+  "rán hòu",
+  "tā men",
+  "guān yú",
+  "yīn wèi",
+  "dá àn",
+  "kě yǐ",
+  "jiā",
+  "xuǎn zé",
+  "shì",
+  "gēn jù",
+  "gěi",
+  "kě yǐ/dé dào",
+  "tā",
+  "huò zhě",
+  "tiān/rì",
+  "bì xū",
+  "dú",
+  "yǔ yán",
+  "yǐ jīng",
+  "bù fèn",
+  "dà zì rán",
+  "zuò wén",
+  "fēn shù",
+  "duǎn wén",
+  "xū yào",
+  "wǒ",
+  "dān yuán",
+  "gèng jiā/gèng duō"
+];
+
+    const en = [
+      "Malay language",
+  "environment",
+  "verb",
+  "eco-friendly",
+  "road",
+  "noun",
+  "measure word",
+  "formatted essay",
+  "textbook",
+  "handicraft",
+  "recycle",
+  "adjective",
+  "underlined words",
+  "fruits",
+  "numeral",
+  "Jalur Gemilang",
+  "gotong-royong",
+  "thank you",
+  "orphan",
+  "school area",
+  "derived word",
+  "reduplicated word",
+  "final exam",
+  "pocket money",
+  "model paper",
+  "self-practice",
+  "active sentence",
+  "baju kurung",
+  "page number",
+  "solar panel",
+  "living room",
+  "vegetables",
+  "interrogative sentence",
+  "plastic bottle",
+  "principal",
+  "conjunction",
+  "free time",
+  "supermarket",
+  "newspaper",
+  "active voice",
+  "noon",
+  "musical instrument",
+  "simple sentence",
+  "auxiliary word",
+  "root word",
+  "compound word",
+  "Sayong clay pot",
+  "uncle",
+  "which/that",
+  "and",
+  "at/in",
+  "that",
+  "with",
+  "inside",
+  "question",
+  "not",
+  "for",
+  "you",
+  "word",
+  "sentence",
+  "material",
+  "on",
+  "to",
+  "we",
+  "student",
+  "this",
+  "below",
+  "will",
+  "from",
+  "word",
+  "by",
+  "school",
+  "then",
+  "they",
+  "about",
+  "because",
+  "answer",
+  "can",
+  "house",
+  "choose",
+  "is",
+  "based on",
+  "to",
+  "can/get",
+  "he",
+  "or",
+  "day",
+  "must",
+  "read",
+  "language",
+  "already",
+  "part",
+  "nature",
+  "essay",
+  "marks",
+  "passage",
+  "need",
+  "I",
+  "unit",
+  "more"
+    ];
+
+    const ms = [
+"bahasa melayu",
+  "alam sekitar",
+  "kata kerja",
+  "mesra alam",
+  "jalan raya",
+  "kata nama",
+  "penjodoh bilangan",
+  "karangan berformat",
+  "buku teks",
+  "kraf tangan",
+  "kitar semula",
+  "kata adjektif",
+  "perkataan bergaris",
+  "buah buahan",
+  "kata bilangan",
+  "jalur gemilang",
+  "gotong royong",
+  "terima kasih",
+  "anak yatim",
+  "kawasan sekolah",
+  "kata berimbuhan",
+  "kata ganda",
+  "ujian akhir",
+  "wang saku",
+  "kertas model",
+  "latihan kendiri",
+  "ayat aktif",
+  "baju kurung",
+  "muka surat",
+  "panel solar",
+  "ruang tamu",
+  "sayur sayuran",
+  "ayat tanya",
+  "botol plastik",
+  "guru besar",
+  "kata hubung",
+  "masa lapang",
+  "pasar raya",
+  "surat khabar",
+  "kerja aktif",
+  "tengah hari",
+  "alat muzik",
+  "ayat tunggal",
+  "kata bantu",
+  "kata dasar",
+  "kata majmuk",
+  "labu sayong",
+  "pak cik",
+  "yang",
+  "dan",
+  "di",
+  "itu",
+  "dengan",
+  "dalam",
+  "soalan",
+  "tidak",
+  "untuk",
+  "kamu",
+  "kata",
+  "ayat",
+  "bahan",
+  "pada",
+  "ke",
+  "kita",
+  "murid",
+  "ini",
+  "bawah",
+  "akan",
+  "daripada",
+  "perkataan",
+  "oleh",
+  "sekolah",
+  "kemudian",
+  "mereka",
+  "tentang",
+  "kerana",
+  "jawapan",
+  "boleh",
+  "rumah",
+  "pilih",
+  "ialah",
+  "berdasarkan",
+  "kepada",
+  "dapat",
+  "dia",
+  "atau",
+  "hari",
+  "hendaklah",
+  "baca",
+  "bahasa",
+  "telah",
+  "bahagian",
+  "alam",
+  "karangan",
+  "markah",
+  "petikan",
+  "perlu",
+  "saya",
+  "unit",
+  "lebih"
+];
+
+    const zhSentences = [
+      "我们在学校学习马来文。",
+  "我们必须保护环境。",
+  "“跑”是一个动词。",
+  "这个袋子很环保。",
+  "过马路要小心。",
+  "“猫”是一个名词。",
+  "我用量词来数东西。",
+  "老师教我们写格式作文。",
+  "我每天读课本。",
+  "这个手工艺品很精美。",
+  "我们要再循环垃圾。",
+  "“美丽”是一个形容词。",
+  "请解释画线的词语。",
+  "我喜欢吃水果。",
+  "“三”是一个数词。",
+  "辉煌条纹是马来西亚的国旗。",
+  "我们一起互助合作打扫课室。",
+  "谢谢你的帮忙。",
+  "我们要帮助孤儿。",
+  "请保持学校范围的清洁。",
+  "这是一个派生词。",
+  "“走走”是一个叠词。",
+  "下个星期是期末考。",
+  "妈妈给我零用钱。",
+  "老师给我们模拟试卷做练习。",
+  "我们要多做自我练习。",
+  "这是一个主动句。",
+  "她穿了一件漂亮的马来传统女装。",
+  "请翻到第十页数。",
+  "屋顶上装了太阳能板。",
+  "我们在客厅看电视。",
+  "我们应该多吃蔬菜。",
+  "“你在做什么”是一个疑问句。",
+  "请把塑料瓶丢进垃圾桶。",
+  "校长在台上讲话。",
+  "“和”是一个连词。",
+  "我利用空闲时间看书。",
+  "我们去超市买东西。",
+  "爸爸每天早上看报纸。",
+  "“我吃饭”是一个主动语态。",
+  "中午我们吃午餐。",
+  "吉他是乐器。",
+  "这是一个单句。",
+  "“已经”是一个助词。",
+  "“读”是一个词根。",
+  "“书本”是一个复合词。",
+  "沙容陶罐很出名。",
+  "我的叔叔是老师。",
+  "我的书。",
+  "我和你。",
+  "在学校。",
+  "那是我的书。",
+  "和朋友玩。",
+  "在书包里。",
+  "我有一个问题。",
+  "我不去学校。",
+  "为了你好。",
+  "你是我的朋友。",
+  "写一个词。",
+  "读一个句子。",
+  "这是学习材料。",
+  "在桌子上。",
+  "去学校。",
+  "我们读书。",
+  "学生读书。",
+  "这是书。",
+  "在桌子下面。",
+  "明天会来。",
+  "从家里来。",
+  "写一个词语。",
+  "由他做。",
+  "学校很美丽。",
+  "然后回家。",
+  "他们很好。",
+  "关于这件事。",
+  "因为下雨。",
+  "答案正确。",
+  "你可以帮我。",
+  "我的家。",
+  "请选择正确的答案。",
+  "他是老师。",
+  "根据课文回答。",
+  "给你。",
+  "我可以得到。",
+  "他去学校。",
+  "你要茶或者咖啡？",
+  "今天很热。",
+  "你必须读书。",
+  "读书。",
+  "学语言。",
+  "已经做完了。",
+  "这是第一部分。",
+  "保护大自然。",
+  "我在写作文。",
+  "我拿到高分。",
+  "读一篇短文。",
+  "我需要帮忙。",
+  "我是学生。",
+  "第一单元。",
+  "我要更多。"
+    ];
+
+    const enSentences = [
+      "We learn Malay language at school.",
+  "We must protect the environment.",
+  "Run is a verb.",
+  "This bag is eco-friendly.",
+  "Be careful when crossing the road.",
+  "Cat is a noun.",
+  "I use measure words to count.",
+  "The teacher teaches us to write formatted essays.",
+  "I read the textbook every morning.",
+  "This handicraft is very beautiful.",
+  "We must recycle rubbish.",
+  "Pretty is an adjective.",
+  "Please explain the underlined words.",
+  "I like to eat fruits.",
+  "Three is a numeral.",
+  "Jalur Gemilang is the flag of Malaysia.",
+  "We work together to clean the class.",
+  "Thank you for your help.",
+  "We should help orphans.",
+  "Keep the school area clean.",
+  "This is a derived word.",
+  "This reduplicated word is unique.",
+  "Next week is the final exam.",
+  "Mother gives me pocket money.",
+  "The teacher gives model papers for practice.",
+  "We need to do self-practice.",
+  "This is an active sentence.",
+  "She wears a beautiful baju kurung.",
+  "Please open page ten.",
+  "A solar panel is installed on the roof.",
+  "We watch TV in the living room.",
+  "We should eat vegetables.",
+  "Interrogative sentences are used to ask questions.",
+  "Throw the plastic bottle into the rubbish bin.",
+  "The principal gives a speech on stage.",
+  "And is a conjunction.",
+  "I read books in my free time.",
+  "We buy things at the supermarket.",
+  "Father reads the newspaper every morning.",
+  "I eat is an active voice.",
+  "We eat lunch at noon.",
+  "The guitar is a musical instrument.",
+  "This is a simple sentence.",
+  "Already is an auxiliary word.",
+  "Read is a root word.",
+  "This word is a compound word.",
+  "The Sayong clay pot is very beautiful.",
+  "My uncle is a teacher.",
+  "The book that I bought.",
+  "Ali and Abu are friends.",
+  "The book is on the table.",
+  "That is my book.",
+  "I play with friend.",
+  "The book is in the bag.",
+  "I have a question.",
+  "I do not go to school.",
+  "For your good.",
+  "You are my friend.",
+  "Write a word.",
+  "Read this sentence.",
+  "This is a learning material.",
+  "The book is on the table.",
+  "Go to school.",
+  "We read books.",
+  "Students study.",
+  "This is my book.",
+  "The book is under the table.",
+  "Will come tomorrow.",
+  "Come from home.",
+  "Write a word.",
+  "Made by him.",
+  "My school is beautiful.",
+  "Then go home.",
+  "They are good.",
+  "About this matter.",
+  "Because it is raining.",
+  "The answer is correct.",
+  "You can help me.",
+  "This is my house.",
+  "Please choose the correct answer.",
+  "He is a teacher.",
+  "Answer based on the text.",
+  "Give to me.",
+  "I can get marks.",
+  "He goes to school.",
+  "Do you want tea or coffee?",
+  "Today is hot.",
+  "You must read.",
+  "Read a book.",
+  "Learn language.",
+  "Already finished.",
+  "This is the first part.",
+  "Protect nature.",
+  "I am writing an essay.",
+  "I get high marks.",
+  "Read this passage.",
+  "I need help.",
+  "I am a student.",
+  "Unit one.",
+  "I want more."
+    ];
+
+    const msSentences = [
+      "Kami belajar bahasa Melayu di sekolah.",
+  "Kita harus menjaga alam sekitar.",
+  "Lari ialah kata kerja.",
+  "Beg ini mesra alam.",
+  "Berhati-hati semasa melintas jalan raya.",
+  "Kucing ialah kata nama.",
+  "Saya menggunakan penjodoh bilangan untuk mengira.",
+  "Cikgu mengajar kami menulis karangan berformat.",
+  "Saya membaca buku teks setiap pagi.",
+  "Kraf tangan ini sangat cantik.",
+  "Kita mesti kitar semula sampah.",
+  "Cantik ialah kata adjektif.",
+  "Sila jelaskan perkataan bergaris.",
+  "Saya suka makan buah-buahan.",
+  "Tiga ialah kata bilangan.",
+  "Jalur Gemilang ialah bendera Malaysia.",
+  "Kami bergotong-royong membersihkan kelas.",
+  "Terima kasih atas bantuan kamu.",
+  "Kita harus menolong anak yatim.",
+  "Jaga kebersihan kawasan sekolah.",
+  "Ini ialah kata berimbuhan.",
+  "Kata ganda ini sangat unik.",
+  "Minggu depan ialah ujian akhir.",
+  "Ibu memberi saya wang saku.",
+  "Cikgu memberi kertas model untuk latihan.",
+  "Kita perlu buat latihan kendiri.",
+  "Ini ialah ayat aktif.",
+  "Dia memakai baju kurung yang cantik.",
+  "Sila buka muka surat sepuluh.",
+  "Panel solar dipasang di bumbung.",
+  "Kami menonton TV di ruang tamu.",
+  "Kita harus makan sayur-sayuran.",
+  "Ayat tanya digunakan untuk bertanya.",
+  "Buang botol plastik ke dalam tong sampah.",
+  "Guru besar berucap di atas pentas.",
+  "Dan ialah kata hubung.",
+  "Saya membaca buku pada masa lapang.",
+  "Kami membeli barang di pasar raya.",
+  "Ayah membaca surat khabar setiap pagi.",
+  "Saya makan ialah kerja aktif.",
+  "Kami makan tengah hari pada waktu tengah hari.",
+  "Gitar ialah alat muzik.",
+  "Ini ialah ayat tunggal.",
+  "Sudah ialah kata bantu.",
+  "Baca ialah kata dasar.",
+  "Perkataan ini ialah kata majmuk.",
+  "Labu sayong sangat cantik.",
+  "Pak cik saya seorang guru.",
+  "Buku yang saya beli itu.",
+  "Ali dan Abu kawan.",
+  "Buku itu di atas meja.",
+  "Itu buku saya.",
+  "Saya bermain dengan kawan.",
+  "Buku dalam beg.",
+  "Saya ada satu soalan.",
+  "Saya tidak pergi ke sekolah.",
+  "Untuk kebaikan kamu.",
+  "Kamu kawan saya.",
+  "Tulis satu kata.",
+  "Baca ayat ini.",
+  "Ini bahan belajar.",
+  "Buku pada meja.",
+  "Pergi ke sekolah.",
+  "Kita baca buku.",
+  "Murid belajar.",
+  "Ini buku saya.",
+  "Buku di bawah meja.",
+  "Akan datang esok.",
+  "Datang daripada rumah.",
+  "Tulis satu perkataan.",
+  "Dibuat oleh dia.",
+  "Sekolah saya cantik.",
+  "Kemudian balik.",
+  "Mereka baik.",
+  "Tentang perkara ini.",
+  "Kerana hujan.",
+  "Jawapan betul.",
+  "Kamu boleh tolong saya.",
+  "Ini rumah saya.",
+  "Sila pilih jawapan yang betul.",
+  "Dia ialah guru.",
+  "Jawab berdasarkan teks.",
+  "Beri kepada saya.",
+  "Saya dapat markah.",
+  "Dia pergi sekolah.",
+  "Kamu mahu teh atau kopi?",
+  "Hari ini panas.",
+  "Kamu hendaklah membaca.",
+  "Baca buku.",
+  "Belajar bahasa.",
+  "Sudah siap.",
+  "Ini bahagian pertama.",
+  "Jaga alam.",
+  "Saya menulis karangan.",
+  "Saya dapat markah tinggi.",
+  "Baca petikan ini.",
+  "Saya perlu bantuan.",
+  "Saya murid.",
+  "Unit satu.",
+  "Saya mahu lebih."
+    ];
+
+    // ===== Set 词库管理 =====
+const wordSets = {
+  "Set 1": {
+    zh: zh,
+    py: py,
+    en: en,
+    ms: ms,
+
+  zhMeaning: [
+    "马来西亚的官方语言。",
+  "我们周围的世界。",
+  "表示动作的词。",
+  "不会破坏环境。",
+  "车子走的路。",
+  "表示人或东西的词。",
+  "用来算东西的词。",
+  "有特定格式的作文。",
+  "在学校学习用的书。",
+  "手工制作的东西。",
+  "用垃圾做新东西。",
+  "用来形容东西的词。",
+  "下面画线的词语。",
+  "植物做成的食物。",
+  "用来数数目的词。",
+  "马来西亚的国旗。",
+  "大家一起分工合作清理。",
+  "表达感谢的话。",
+  "没有父母的孩子。",
+  "学校里面的范围。",
+  "有附加成分的词。",
+  "重复两次的词。",
+  "学年结束时的考试。",
+  "在学校用的零用钱。",
+  "用来练习的模拟试卷。",
+  "自己做的练习。",
+  "主语做动作的句子。",
+  "马来女性的传统服装。",
+  "书本上的页码。",
+  "吸收太阳光变成电的工具。",
+  "给客人坐的地方。",
+  "健康的绿色食物。",
+  "用来问问题的句子。",
+  "塑料做的瓶子。",
+  "管理学校的最高领导。",
+  "用来连接句子的词。",
+  "没有工作做的时间。",
+  "买日常用品的大店。",
+  "看新闻的纸。",
+  "动词是主动做动作的句子。",
+  "中午十二点。",
+  "发出声音的工具。",
+  "短又容易的句子。",
+  "帮助动词的词。",
+  "没有附加成分的基本词。",
+  "两个词合成一个词。",
+  "沙容出产的陶罐。",
+  "对男性长辈的称呼。",
+  "用来连接句子的词。",
+  "用来连接两个东西。",
+  "表示地点。",
+  "那个。",
+  "和某人一起。",
+  "在里面。",
+  "要问的问题。",
+  "不是或不。",
+  "为了某个目的。",
+  "你。",
+  "词语。",
+  "完整的一句话。",
+  "使用的东西。",
+  "表示时间或地点。",
+  "到某个地方。",
+  "我们。",
+  "在学校读书的人。",
+  "这个。",
+  "在下面。",
+  "以后会。",
+  "表示来源。",
+  "语言里的词。",
+  "由谁做的。",
+  "学习的地方。",
+  "之后。",
+  "别人。",
+  "关于某件事。",
+  "因为某件事。",
+  "问题的解答。",
+  "可以或有能力。",
+  "住的地方。",
+  "从几个里面选一个。",
+  "表示肯定的词。",
+  "根据或参考。",
+  "表示给谁。",
+  "可以或得到。",
+  "他。",
+  "两个选择中的一个。",
+  "一天的时间。",
+  "必须或一定要。",
+  "看书认字。",
+  "沟通的系统。",
+  "已经发生了。",
+  "整体中的一部分。",
+  "大自然和世界。",
+  "写出来的文章。",
+  "给作业的分数。",
+  "一小段文章。",
+  "需要或必须有。",
+  "我。",
+  "书里的一个部分。",
+  "更加或更多。"
+  ],
+
+  msMeaning: [
+    "Bahasa rasmi Malaysia.",
+  "Dunia di sekeliling kita.",
+  "Kata yang tunjuk perbuatan.",
+  "Tidak merosakkan alam.",
+  "Jalan untuk kereta.",
+  "Kata nama untuk orang atau benda.",
+  "Kata untuk kira benda.",
+  "Karangan yang ada format khas.",
+  "Buku untuk belajar di sekolah.",
+  "Barang yang dibuat dengan tangan.",
+  "Proses buat barang baru dari sampah.",
+  "Kata yang terangkan sifat benda.",
+  "Perkataan yang ada garisan.",
+  "Makanan dari tumbuhan.",
+  "Kata untuk kira bilangan.",
+  "Bendera negara Malaysia.",
+  "Kerja bersama-sama bersihkan tempat.",
+  "Kata untuk ucap rasa syukur.",
+  "Budak yang tiada ibu bapa.",
+  "Kawasan di dalam sekolah.",
+  "Perkataan yang ada imbuhan.",
+  "Kata yang diulang dua kali.",
+  "Peperiksaan di akhir tahun.",
+  "Duit untuk belanja di sekolah.",
+  "Kertas soalan untuk latihan.",
+  "Latihan buat sendiri.",
+  "Ayat yang subjeknya buat kerja.",
+  "Baju tradisional perempuan Melayu.",
+  "Nombor di halaman buku.",
+  "Alat untuk dapat tenaga matahari.",
+  "Tempat untuk tetamu duduk.",
+  "Makanan hijau yang sihat.",
+  "Ayat untuk tanya soalan.",
+  "Botol yang dibuat dari plastik.",
+  "Orang yang mengetuai sekolah.",
+  "Kata untuk sambung ayat.",
+  "Masa bila tidak buat kerja.",
+  "Kedai besar untuk beli barang.",
+  "Kertas untuk baca berita.",
+  "Ayat yang tunjuk kerja aktif.",
+  "Masa pukul dua belas tengah hari.",
+  "Alat untuk buat muzik.",
+  "Ayat yang pendek dan mudah.",
+  "Kata yang bantu kata kerja.",
+  "Perkataan asas tanpa imbuhan.",
+  "Dua perkataan dicantum jadi satu.",
+  "Pasu tanah dari Sayong.",
+  "Panggilan untuk lelaki tua.",
+  "Kata untuk sambung ayat.",
+  "Kata untuk sambung dua perkara.",
+  "Kata untuk tunjuk tempat.",
+  "Kata untuk tunjuk benda jauh.",
+  "Kata untuk sertai sama-sama.",
+  "Di dalam.",
+  "Soalan untuk ditanya.",
+  "Bukan atau tidak.",
+  "Kata untuk tujuan.",
+  "Kata ganti nama diri orang kedua.",
+  "Perkataan.",
+  "Susunan perkataan yang lengkap.",
+  "Benda yang digunakan.",
+  "Kata untuk tunjuk masa atau tempat.",
+  "Kata untuk tunjuk arah pergi.",
+  "Kata ganti nama diri orang ramai.",
+  "Pelajar di sekolah.",
+  "Kata untuk tunjuk benda dekat.",
+  "Di bahagian bawah.",
+  "Kata untuk masa hadapan.",
+  "Kata untuk tunjuk asal usul.",
+  "Perkataan dalam bahasa.",
+  "Dibuat oleh.",
+  "Tempat untuk belajar.",
+  "Selepas itu.",
+  "Orang lain.",
+  "Berkaitan dengan sesuatu.",
+  "Sebab sesuatu berlaku.",
+  "Jawapan kepada soalan.",
+  "Boleh atau mampu.",
+  "Tempat tinggal.",
+  "Pilih satu daripada beberapa.",
+  "Kata untuk menerangkan.",
+  "Ikut atau guna sebagai asas.",
+  "Kata untuk tunjuk penerima.",
+  "Boleh atau mendapat.",
+  "Kata ganti nama untuk lelaki.",
+  "Pilihan untuk dua benda.",
+  "Masa 24 jam.",
+  "Mesti atau wajib.",
+  "Lihat dan faham perkataan.",
+  "Sistem komunikasi.",
+  "Sudah berlaku.",
+  "Satu bahagian daripada sesuatu.",
+  "Dunia dan tumbuhan.",
+  "Tulisan atau esei.",
+  "Markah untuk kerja.",
+  "Teks pendek untuk dibaca.",
+  "Perlu atau mesti ada.",
+  "Kata ganti nama diri orang pertama.",
+  "Satu bahagian dalam buku.",
+  "Lagi atau tambah."
+  ],
+
+  enMeaning: [
+    "The official language of Malaysia.",
+  "The world around us.",
+  "A word that shows an action.",
+  "Does not harm the environment.",
+  "A way for cars to go.",
+  "A word for a person or thing.",
+  "A word to count things.",
+  "An essay with a specific format.",
+  "A book to study in school.",
+  "Things made by hand.",
+  "Making new things from rubbish.",
+  "A word that describes things.",
+  "Words with a line under them.",
+  "Food from plants.",
+  "A word to count numbers.",
+  "The flag of Malaysia.",
+  "Working together to clean a place.",
+  "Words to say thank you.",
+  "A child with no parents.",
+  "The area inside the school.",
+  "A word with additions.",
+  "A word said two times.",
+  "The exam at the end of the year.",
+  "Money to spend at school.",
+  "A paper for practice exams.",
+  "Practice done by oneself.",
+  "A sentence where the subject does the action.",
+  "A traditional Malay dress for women.",
+  "The number on a book page.",
+  "A tool to get energy from the sun.",
+  "A place for guests to sit.",
+  "Healthy green food.",
+  "A sentence used to ask questions.",
+  "A bottle made of plastic.",
+  "The leader of a school.",
+  "A word to join sentences.",
+  "Time when you are not working.",
+  "A big shop to buy things.",
+  "Paper for reading news.",
+  "A sentence where the verb is active.",
+  "Twelve o'clock in the afternoon.",
+  "A tool to make music.",
+  "A short and easy sentence.",
+  "A word that helps a verb.",
+  "A basic word without additions.",
+  "Two words joined into one.",
+  "A clay pot from Sayong.",
+  "A word for an older man.",
+  "Used to join sentences.",
+  "Used to join two things.",
+  "Shows a place.",
+  "That.",
+  "Together with someone.",
+  "Inside.",
+  "A question to ask.",
+  "Not or no.",
+  "For a purpose.",
+  "You.",
+  "A word.",
+  "A complete group of words.",
+  "Things that are used.",
+  "Shows time or place.",
+  "To a place.",
+  "We.",
+  "A person who studies at school.",
+  "This.",
+  "At the bottom.",
+  "Will happen later.",
+  "Shows where something comes from.",
+  "Words in a language.",
+  "Done by.",
+  "A place to learn.",
+  "After that.",
+  "Other people.",
+  "About something.",
+  "Because of something.",
+  "The reply to a question.",
+  "Can or able to.",
+  "A place to live.",
+  "Choose one from a few.",
+  "A word to show something is true.",
+  "Based on.",
+  "Shows who receives.",
+  "Can or get.",
+  "He.",
+  "A choice between two things.",
+  "A time of 24 hours.",
+  "Must or have to.",
+  "To look at words.",
+  "A system of communication.",
+  "Already happened.",
+  "A part of something.",
+  "The natural world.",
+  "A written text or essay.",
+  "Marks for work.",
+  "A short text for reading.",
+  "Need or must have.",
+  "I.",
+  "A part of a book.",
+  "More or add."
+  ],
+
+  zhSentences: zhSentences,
+    enSentences: enSentences,
+    msSentences: msSentences
+  },
+
+  "Set 2": {
+    zh: ["同学", "朋友", "辛辣"],
+    py: ["tóng xué", "péng you", "xīn là"],
+    en: ["classmate", "friend", "spicy"],
+    ms: ["rakan sekelas", "kawan", "pedas"],
+    zhSentences: [
+      "我的同学很友善。",
+      "他是我的好朋友。",
+      "我不喜欢吃辛辣的食物。"
+    ],
+    enSentences: [
+      "My classmate is friendly.",
+      "He is my good friend.",
+      "I do not like spicy food."
+    ],
+    msSentences: [
+      "Rakan sekelas saya sangat baik.",
+      "Dia ialah kawan baik saya.",
+      "Saya tidak suka makan makanan yang pedas."
+    ]
+  },
+
+  "Set 3": {
+    zh: ["篮球", "老师", "学校"],
+    py: ["lán qiú", "lǎo shī", "xué xiào"],
+    en: ["basketball", "teacher", "school"],
+    ms: ["bola keranjang", "guru", "sekolah"],
+    zhSentences: [
+      "我喜欢打篮球。",
+      "我的老师很亲切。",
+      "我每天去学校上课。"
+    ],
+    enSentences: [
+      "I like playing basketball.",
+      "My teacher is very kind.",
+      "I go to school every day."
+    ],
+    msSentences: [
+      "Saya suka bermain bola keranjang.",
+      "Guru saya sangat baik hati.",
+      "Saya pergi ke sekolah setiap hari."
+    ]
+  }
+};
+
+let activeSet = wordSets["Set 1"];
+
+    // ===== DOM & 语音 =====
+    let currentIndex = 0;
+    const questionDiv = document.getElementById('question');
+    const wordDiv = document.getElementById('word');
+    const meaningDiv = document.getElementById('meaning');
+
+    function setMeaning(text) { meaningDiv.textContent = text || ''; }
+
+    // 统一的朗读函数（默认：慢速 0.4、音高 0.6）
+    function speak(text, lang, preferNames = [], rate = 1.0, pitch = 0.6) {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang;
+      u.rate = rate;
+      u.pitch = pitch;
+
+      const trySpeak = () => {
+        const voices = speechSynthesis.getVoices() || [];
+        let candidates = voices.filter(v => (v.lang || '').toLowerCase().startsWith(lang.toLowerCase()));
+        // 如果没有马来语，回退印尼语
+        if (!candidates.length && lang.toLowerCase().startsWith('ms')) {
+          candidates = voices.filter(v => (v.lang || '').toLowerCase().startsWith('id'));
+          if (candidates.length) u.lang = 'id-ID';
+        }
+        for (const key of preferNames) {
+          const found = candidates.find(v => (v.name || '').toLowerCase().includes(key.toLowerCase()));
+          if (found) { u.voice = found; break; }
+        }
+        if (!u.voice && candidates.length) u.voice = candidates[0];
+        speechSynthesis.cancel();
+        speechSynthesis.speak(u);
+      };
+
+      if (speechSynthesis.getVoices().length === 0) {
+        speechSynthesis.onvoiceschanged = trySpeak;
+      }
+      trySpeak();
+    }
+
+    // ===== 华文为主（按钮函数不再覆盖速率/音高）=====
+    function playChineseWord() {
+  const text = activeSet.zh[currentIndex] || '';
+  const pinyin = activeSet.py[currentIndex] || '';
+
+  setMeaning(pinyin);
+
+  speak(text, 'zh-CN', ['Xiaoyi','Microsoft']);
+}
+
+    function showEnglish() {
+      const text = activeSet.en[currentIndex] || '(待添加英文)';
+      setMeaning(text);
+      speak(text, 'en-US', ['Google','Microsoft','Natural']);
+    }
+
+    function playMalayWord(){
+
+const text = activeSet.ms[currentIndex] || '';
+
+setMeaning('');
+
+speak(
+text,
+'ms-MY',
+['Microsoft','Malay','Bahasa']
+);
+
+}
+
+    function showChineseSentence() {
+      const text = activeSet.zhSentences[currentIndex] || '(待添加华文造句)';
+      setMeaning(text);
+      speak(text, 'zh-CN', ['Xiaoyi','Microsoft']);
+    }
+
+    function showEnglishSentence() {
+      const text = activeSet.enSentences[currentIndex] || '(待添加英文句子)';
+      setMeaning(text);
+      speak(text, 'en-US', ['Google','Microsoft','Natural']);
+    }
+
+    function showMalaySentence() {
+      const text = activeSet.msSentences[currentIndex] || '(待添加马来文句子)';
+      setMeaning(text);
+      speak(text, 'ms-MY', ['Rizwan','Microsoft','Malay','Bahasa']);
+    }
+
+    function nextWord() {
+
+if(currentIndex < activeSet.ms.length - 1){
+
+currentIndex++;
+
+updateQuestion();
+
+}
+
+}
+
+    function prevWord(){
+
+if(currentIndex > 0){
+
+currentIndex--;
+
+updateQuestion();
+
+}
+
+}
+
+    function updateQuestion() {
+  questionDiv.innerText = `题目 ${currentIndex + 1}`;
+  wordDiv.innerText = activeSet.ms[currentIndex] || '—';
+  setMeaning('');
+}
+
+
+// ===== 搜索功能 =====
+function searchWord() {
+
+  const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
+
+  if (!keyword) {
+    alert("请输入要搜索的词语");
+    return;
+  }
+
+
+  const index = activeSet.ms.findIndex(word => 
+    word.toLowerCase() === keyword
+  );
+
+
+  if (index !== -1) {
+
+    currentIndex = index;
+    updateQuestion();
+
+  } else {
+
+    alert("没有找到：" + keyword);
+
+  }
+
+}
+
+// ===== 真正含义 =====
+
+function showTrueChinese() {
+  const text = activeSet.zhMeaning[currentIndex] || '暂时没有华文解释';
+  setMeaning(text);
+  speak(text, 'zh-CN', ['Xiaoyi', 'Microsoft']);
+}
+
+function showTrueMalay() {
+  const text = activeSet.msMeaning[currentIndex] || 'Tiada penerangan Bahasa Melayu';
+  setMeaning(text);
+  speak(text, 'ms-MY', ['Microsoft', 'Malay', 'Bahasa']);
+}
+
+function showTrueEnglish() {
+  const text = activeSet.enMeaning[currentIndex] || 'No English explanation available';
+  setMeaning(text);
+  speak(text, 'en-US', ['Google', 'Microsoft', 'Natural']);
+}
+
+function showChinese(){
+
+const text = activeSet.zh[currentIndex] || '';
+
+setMeaning(text);
+
+speak(
+text,
+'zh-CN',
+['Xiaoyi','Microsoft']
+);
+
+}
+
+function goToReadingTest() {
+  const selectedSet = document.getElementById("setSelect").value;
+
+  window.location.href = `Reading/ReadingTest${selectedSet.replace("Set ", "Set")}.html`;
+}
+
+function goToMeaningTest() {
+  const selectedSet = document.getElementById("setSelect").value;
+
+  window.location.href = `Meaning/MeaningTest${selectedSet.replace("Set ", "Set")}.html`;
+}
+
+function changeSet() {
+  const selectedSet = document.getElementById("setSelect").value;
+
+  if (!wordSets[selectedSet]) return;
+
+  activeSet = wordSets[selectedSet];
+
+  currentIndex = 0;
+  updateQuestion();
+}
+
+updateQuestion();
+  </script>
+</body>
+</html>
