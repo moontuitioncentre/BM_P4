@@ -2180,19 +2180,19 @@ let currentStudentGrade = "";
 let currentTestName =
 "BM_P4_Meaning_Set 2";
 
+
 function getTestID(){
 
-    return (
-        currentStudentName +
-        "_" +
-        currentStudentGrade +
-        "_" +
-        SUBJECT +
-        "_" +
-        TEST_TYPE
-    );
+return (
+currentStudentName + "_" +
+currentStudentGrade + "_" +
+SUBJECT + "_" +
+TEST_TYPE + "_" +
+currentTestName
+);
 
 }
+
 
 
 const wordDiv =
@@ -2663,14 +2663,9 @@ async function loadProgress(){
 
     try{
 
-        const studentID =
-currentStudentName +
-"_" +
-currentStudentGrade +
-"_" +
-SUBJECT +
-"_" +
-TEST_TYPE;
+
+const testID = getTestID();
+
 
 
         /*
@@ -3711,14 +3706,9 @@ async function saveProgress(){
 
     try{
 
-        const studentID =
-currentStudentName +
-"_" +
-currentStudentGrade +
-"_" +
-SUBJECT +
-"_" +
-TEST_TYPE;
+
+const testID = getTestID();
+
 
 
         await window.setDoc(
